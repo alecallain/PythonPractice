@@ -27,6 +27,12 @@ class DeliveryOrder:
         else:
             raise ValueError("Invalid state transition. Must be an instance of OrderState.")
 
+    def cancel(self):
+        if self.order_state in [OrderState.CREATED, OrderState.SEARCHING, OrderState.ASSIGNED]:
+            self.order_state = OrderState.CANCELLED
+        else:
+            raise ValueError("Cannot cancel order in its current state.")
+
 
 if (__name__ == "__main__"):
     print("This script is being run directly.")
