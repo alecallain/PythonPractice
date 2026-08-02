@@ -1,4 +1,5 @@
 from enum import Enum
+import uuid
 
 class OrderState(Enum):
     CREATED = 1
@@ -10,16 +11,21 @@ class OrderState(Enum):
     CANCELLED = 7
 
 class DeliveryOrder:
-    def __init__(self, order_state, pickup_addr, dropoff_addr, desc):
-        self.order_state = order_state
-        self.pickup_addr = pickup_addr
-        self.dropoff_addr = dropoff_addr
+    BASE_FARE = 5.00
+    DISTANCE_FARE = 1.50
+
+    def __init__(self, pickup_address, ship_to_address, desc, price):
+        self.id = str(uuid.uuid4())
+        self.order_state = OrderState.CREATED
+        self.pickup_address = pickup_address
+        self.ship_to = ship_to_address
         self.desc = desc
+        self.price = price
 
     def transition(self, new_state):
         if isinstance(new_state, OrderState):
-            if ((self.order_state == OrderState.IN_TRANSIT or \
-                  self.order_state == OrderState.DELIVERED) and \
+            if ((self.order_state == OrderState.IN_TRANSIT or
+                 self.order_state == OrderState.DELIVERED) and
                     new_state == OrderState.CANCELLED):
                 raise ValueError("Invalid state transition from IN_TRANSIT or DELIVERED to CANCELLED.")
             else:
@@ -32,6 +38,13 @@ class DeliveryOrder:
             self.order_state = OrderState.CANCELLED
         else:
             raise ValueError("Cannot cancel order in its current state.")
+
+    def surge(self, amount):
+        self.surge_price = amount
+
+    @staticmethod
+    def quote(pickup, ship_to_address, desc) -> int:
+        return BASE_FARE + DISTANCE_FARE + surge_price
 
 
 if (__name__ == "__main__"):
