@@ -20,7 +20,7 @@ Technical interviews lean heavily on a handful of classic algorithm patterns (Le
 
 Each pattern has a direct real-world precedent — dispatch/routing problems like these show up in public engineering writeups from Uber, DoorDash, and Instacart.
 
-Full requirements and every user story's acceptance criteria: [`dispatchiq/docs/BACKLOG.md`](./dispatchiq/docs/BACKLOG.md).
+Full requirements and every user story's acceptance criteria: [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
 ### Authorship
 
