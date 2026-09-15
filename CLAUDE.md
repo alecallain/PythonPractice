@@ -34,17 +34,18 @@ Suggested sprint order (see BACKLOG.md for the full table): setup → accounts �
 
 ## Repo layout
 
-Application code lives under `dispatchiq/`, but requirements docs live at the repo root:
+Application code and requirements docs both live at the repo root (flattened — there is no `dispatchiq/` wrapper folder):
 
 ```
 docs/BACKLOG.md          # full requirements — the source of truth for scope/AC
-dispatchiq/
-  pyproject.toml          # currently empty — no build backend, deps, or tooling configured yet
-  src/dispatch/
-    __init__.py            # empty
-    main.py                 # entry point stub (print-only placeholder so far)
-    orderState.py           # OrderState enum + DeliveryOrder — Epic 2 (Order Lifecycle)
-  tests/                    # exists, currently empty
+pyproject.toml            # currently empty — no build backend, deps, or tooling configured yet
+src/
+  __init__.py              # empty
+  dispatch/
+    __init__.py             # empty
+    main.py                  # entry point stub (print-only placeholder so far)
+    orderState.py            # OrderState enum + DeliveryOrder — Epic 2 (Order Lifecycle)
+tests/                     # exists, currently empty
 ```
 
 `README.md` at the repo root explains the project's purpose and an authorship note: application code is written by the user, not AI — AI's role has been limited to planning (product/BA/QE) during requirements writing, not implementation.
@@ -53,9 +54,10 @@ dispatchiq/
 
 - Requirements and backlog are complete; implementation is early and incremental (see commit history — one story/function at a time, e.g. `orderState.py`'s `cancel()` was added as its own commit for Story 2.3).
 - No test framework, linter, or build backend is configured yet (`pyproject.toml` is empty, `tests/` is empty). Don't assume `pytest`/`ruff`/etc. are wired up — check `pyproject.toml` before assuming any tooling command works, and ask before introducing new tooling/dependencies.
-- Run scripts directly, e.g. `python3 dispatchiq/src/dispatch/main.py`, until a proper package/entry-point setup exists.
+- Run scripts directly, e.g. `python3 src/dispatch/main.py`, until a proper package/entry-point setup exists.
 
 ## Architecture notes
 
 - `orderState.py` models order lifecycle state as `OrderState` (an `Enum`) plus a `DeliveryOrder` class with a guarded `transition()` method and a narrower `cancel()` convenience method. Both enforce the state machine described in BACKLOG.md Story 2.2/2.3 (e.g. cancellation only from `CREATED`/`SEARCHING`/`ASSIGNED`; no transition into `CANCELLED` from `IN_TRANSIT`/`DELIVERED`). When extending order lifecycle logic, keep new transitions consistent with the AC in Story 2.2 rather than adding ad hoc state checks elsewhere.
+- `orderState.py` also currently holds `Vehicle` (vehicle type + capacity fields, Story 3.2) and `Driver` (composes a `Vehicle`, plus an availability toggle, Story 3.1) — these are mid-move to their own files (`vehicle.py`, `driver.py`) and don't belong in `orderState.py` long-term.
 - The Epic 4 algorithmic components (sliding window, hash map, graph BFS/DFS, heap, DP) don't exist yet — when they're built, expect them to be the core of the dispatch flow that Epic 2's order lifecycle and Epic 3's driver availability feed into.
