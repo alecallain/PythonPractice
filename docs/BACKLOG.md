@@ -15,7 +15,7 @@ Deliberately designed so five classic interview algorithm patterns are load-bear
 ---
 
 ## Status Legend
-Last reviewed against the codebase: 2026-09-19.
+Last reviewed against the codebase: 2026-09-27.
 
 - ✅ Complete (meets the acceptance criterion)
 - 🚧 In flight (started, partially meets AC)
@@ -66,7 +66,7 @@ Epic/story headings show overall status; in-flight stories also show per-AC stat
 - 🚧 AC1: Order requires pickup address, dropoff address, and package description.
 - ⬜ AC2: Order is quoted a price (see Epic 5) before customer confirms.
 - ⬜ AC3: Order enters "searching for driver" state immediately after confirmation.
-- **QA note:** AC1 fields exist but no required-field validation; `quote()` is broken (unqualified `BASE_FARE`/`surge_price`); no confirm step into `SEARCHING`.
+- **QA note:** AC1 fields exist; `price` is now validated/coerced to `Decimal` in `__post_init__`, but `pickup_address`/`ship_to_address`/`desc` still have no required-field validation. `quote()` now runs (fixed the unqualified `BASE_FARE`/`surge_price` bug) but isn't wired into order creation yet; no confirm step into `SEARCHING`.
 
 ### STORY 2.2 — Order state machine 🚧
 *As a system, orders need to move through well-defined states, so every part of the app can trust what stage an order is in.*
@@ -153,7 +153,7 @@ Epic/story headings show overall status; in-flight stories also show per-AC stat
 *As a customer, I want to see a price quote before confirming my order, so there are no surprises.*
 - ⬜ AC1: Quote = base fare + distance-based fare + surge multiplier (from Story 4.1).
 - ⬜ AC2: Quote is locked for 60 seconds after being shown; re-quoted if the customer takes longer to confirm.
-- **QA note:** Only `BASE_FARE`/`DISTANCE_FARE` constants exist; quote logic and 60s lock not implemented.
+- **QA note:** `quote()` now computes `BASE_FARE + DISTANCE_FARE + surge_price` as a working classmethod, but `DISTANCE_FARE` is still a flat constant rather than an actual distance-based calculation (AC1 not fully met); 60s quote lock still not implemented (AC2).
 
 ### STORY 5.2 — Driver payout calculation ⬜
 *As a driver, I want to see how much I'll earn for a delivery before accepting it, so I can decide whether it's worth it.*

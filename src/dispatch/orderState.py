@@ -1,3 +1,6 @@
+from dataclasses import dataclass, field
+from decimal import Decimal
+from typing import ClassVar
 from enum import Enum
 import uuid
 
@@ -10,17 +13,38 @@ class OrderState(Enum):
     DELIVERED = 6
     CANCELLED = 7
 
+@dataclass
 class DeliveryOrder:
-    BASE_FARE = 5.00
-    DISTANCE_FARE = 1.50
+    pickup_address: str
+    ship_to_address: str
+    desc: str
+    price: Decimal
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    order_state: OrderState = OrderState.CREATED
 
-    def __init__(self, pickup_address, ship_to_address, desc, price):
-        self.id = str(uuid.uuid4())
-        self.order_state = OrderState.CREATED
-        self.pickup_address = pickup_address
-        self.ship_to = ship_to_address
-        self.desc = desc
-        self.price = price
+    _BASE_FARE : ClassVar[Decimal] = Decimal(5)
+    _DISTANCE_FARE : ClassVar[Decimal] = Decimal("1.50")
+
+    def __post_init__(self):
+        self.price = self.validate(self.price)
+
+    def validate(self, item: str | int):
+        match item:
+            case int():
+                try:
+                    return Decimal(item)
+                except Exception:
+                    raise ValueError("Cannot convert item to Decimal from int.")
+            case str():
+                try:
+                    return Decimal(item)
+                except Exception:
+                    raise ValueError("Cannot convert item to Decimal from str.")
+            case Decimal():
+                return item
+            case _:
+                raise ValueError("Item must be an int or str.")
+
 
     def transition(self, new_state):
         if isinstance(new_state, OrderState):
@@ -39,13 +63,12 @@ class DeliveryOrder:
         else:
             raise ValueError("Cannot cancel order in its current state.")
 
-    def surge(self, amount):
+    def surge(self, amount: Decimal):
         self.surge_price = amount
 
-    @staticmethod
-    def quote(pickup, ship_to_address, desc) -> int:
-        return BASE_FARE + DISTANCE_FARE + surge_price
-
+    @classmethod
+    def quote(cls, surge_price: Decimal = Decimal(0)) -> Decimal:
+        return cls._BASE_FARE + cls._DISTANCE_FARE + surge_price
 
 if (__name__ == "__main__"):
     print("This script is being run directly.")
