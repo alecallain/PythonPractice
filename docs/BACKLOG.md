@@ -90,14 +90,14 @@ Epic/story headings show overall status; in-flight stories also show per-AC stat
 ### STORY 3.1 — Toggle availability 🚧
 *As a driver, I want to mark myself available/unavailable, so I only receive order offers when I'm actually working.*
 - ✅ AC1: Toggle updates driver status instantly; unavailable drivers are excluded from dispatch candidate pools.
-- ⬜ AC2: Going unavailable mid-delivery does not cancel the active delivery — only affects new assignments.
-- **QA note:** Toggle works (`Driver.available()`). AC1 has nothing to verify against until dispatch exists; AC2 needs an in-delivery state.
+- 🚧 AC2: Going unavailable mid-delivery does not cancel the active delivery — only affects new assignments.
+- **QA note:** Toggle works (`Driver.toggle_availability()`; drivers default to available). AC1 has nothing to verify against until dispatch exists. AC2: `Driver` now holds an assigned `order` (`assign_order`/`assigned_order`/`clear_order`) and toggling leaves it untouched, but there's no test covering it yet.
 
 ### STORY 3.2 — Vehicle profile 🚧
 *As a driver, I want to specify my vehicle type and capacity, so I'm only offered orders I can actually carry.*
-- 🚧 AC1: Profile includes vehicle type (bike/car/van) and max weight/volume.
-- ⬜ AC2: Orders exceeding a driver's capacity are excluded from their offers.
-- **QA note:** Fields exist on `Vehicle`; type isn't restricted to bike/car/van. AC2 needs order weight/volume.
+- ✅ AC1: Profile includes vehicle type (bike/car/van) and max weight/volume.
+- 🚧 AC2: Orders exceeding a driver's capacity are excluded from their offers.
+- **QA note:** AC1: type restricted via `VEHICLE_TYPES` enum (BIKE/CAR/VAN); weight/volume must be > 0. Tests cover weight/volume validation but not the invalid-type `TypeError`. AC2: `Vehicle.can_carry(order)` checks order weight/volume against capacity; exclusion from offers depends on Epic 4 dispatch.
 
 ---
 

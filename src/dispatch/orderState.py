@@ -19,6 +19,8 @@ class DeliveryOrder:
     ship_to_address: str
     desc: str
     price: Decimal
+    weight: Decimal
+    volume: Decimal
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     order_state: OrderState = OrderState.CREATED
 
@@ -27,6 +29,8 @@ class DeliveryOrder:
 
     def __post_init__(self):
         self.price = self.validate(self.price)
+        self.weight = self.validate(self.weight)
+        self.volume = self.validate(self.volume)
 
     def validate(self, item: str | int):
         match item:
