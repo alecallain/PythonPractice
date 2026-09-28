@@ -4,7 +4,7 @@ This repo is dedicated to me delving back into the world of Python since college
 
 ## DispatchIQ
 
-A local delivery dispatch platform (customers request deliveries, drivers get matched to orders, pricing adjusts with real-time demand, admins get operational visibility) — think a scaled-down Uber/DoorDash dispatch backend. Code lives in [`dispatchiq/`](./dispatchiq).
+A local delivery dispatch platform (customers request deliveries, drivers get matched to orders, pricing adjusts with real-time demand, admins get operational visibility) — think a scaled-down Uber/DoorDash dispatch backend. Code lives in [`src/dispatch/`](./src/dispatch).
 
 ### Why this project exists
 

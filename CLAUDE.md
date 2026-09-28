@@ -46,13 +46,13 @@ src/
   dispatch/
     __init__.py             # empty
     main.py                  # entry point stub (print-only placeholder so far)
-    orderState.py            # OrderState enum + DeliveryOrder — Epic 2 (Order Lifecycle)
-    driver.py                # Driver (composes a Vehicle, availability toggle) — Story 3.1
-    vehicle.py               # Vehicle (type, max weight/volume) — Story 3.2
+    orderState.py            # OrderState enum + DeliveryOrder dataclass — Epic 2 (Order Lifecycle)
+    driver.py                # Driver (composes a Vehicle, availability toggle, assigned order) — Story 3.1
+    vehicle.py               # Vehicle dataclass (VEHICLE_TYPES enum, max weight/volume, can_carry) — Story 3.2
 tests/
   __init__.py
   test_driver.py           # init smoke test only
-  test_vehicle.py          # init smoke test only
+  test_vehicle.py          # init smoke test + weight/volume validation
 ```
 
 `README.md` at the repo root explains the project's purpose and an authorship note: application code is written by the user, not AI — AI's role has been limited to planning (product/BA/QE) during requirements writing, not implementation.
@@ -60,13 +60,14 @@ tests/
 ## Status / working conventions
 
 - Requirements and backlog are complete; implementation is early and incremental (see commit history — one story/function at a time, e.g. `orderState.py`'s `cancel()` was added as its own commit for Story 2.3).
-- `pytest` is the only tooling wired up, installed from `requirements-dev.txt` into a local `.venv` (see `docs/DEV_SETUP.md`); run tests with `python -m pytest`. Existing tests are init smoke tests only. `pyproject.toml` is empty and there is no linter or build backend — ask before introducing new tooling/dependencies.
+- `pytest` is the only tooling wired up, installed from `requirements-dev.txt` into a local `.venv` (see `docs/DEV_SETUP.md`); run tests with `python -m pytest`. Existing tests are thin: init smoke tests plus `Vehicle` weight/volume validation. `pyproject.toml` is empty and there is no linter or build backend — ask before introducing new tooling/dependencies.
 - Run scripts directly, e.g. `python3 src/dispatch/main.py`, until a proper package/entry-point setup exists.
-- `docs/BACKLOG.md` carries per-epic/story/AC status markers (✅ complete, 🚧 in flight, ⬜ not started) with QA notes on in-flight stories. As of 2026-09-19 nothing is fully complete: Epics 2, 3 and 5 are in flight, the rest not started. Update the markers when a story lands.
+- `docs/BACKLOG.md` carries per-epic/story/AC status markers (✅ complete, 🚧 in flight, ⬜ not started) with QA notes on in-flight stories. As of 2026-09-27 nothing is fully complete: Epics 2, 3 and 5 are in flight, the rest not started. Update the markers when a story lands.
 
 ## Architecture notes
 
-- `orderState.py` models order lifecycle state as `OrderState` (an `Enum`) plus a `DeliveryOrder` class with a guarded `transition()` method and a narrower `cancel()` convenience method. Both enforce the state machine described in BACKLOG.md Story 2.2/2.3 (e.g. cancellation only from `CREATED`/`SEARCHING`/`ASSIGNED`; no transition into `CANCELLED` from `IN_TRANSIT`/`DELIVERED`). When extending order lifecycle logic, keep new transitions consistent with the AC in Story 2.2 rather than adding ad hoc state checks elsewhere.
-- `Vehicle` (Story 3.2) and `Driver` (Story 3.1) now live in their own files, `vehicle.py` and `driver.py`; `Driver` composes a `Vehicle`.
-- `DeliveryOrder.quote()` and `surge()` are unfinished stubs (`quote()` references `BASE_FARE`/`surge_price` unqualified and is not yet functional) — Epic 5 pricing is not implemented.
+- `orderState.py` models order lifecycle state as `OrderState` (an `Enum`) plus a `DeliveryOrder` dataclass with a guarded `transition()` method and a narrower `cancel()` convenience method. Both enforce the state machine described in BACKLOG.md Story 2.2/2.3 (e.g. cancellation only from `CREATED`/`SEARCHING`/`ASSIGNED`; no transition into `CANCELLED` from `IN_TRANSIT`/`DELIVERED`). When extending order lifecycle logic, keep new transitions consistent with the AC in Story 2.2 rather than adding ad hoc state checks elsewhere.
+- `DeliveryOrder` carries `price`, `weight` and `volume`, each normalized to `Decimal` in `__post_init__` via `validate()` (accepts int/str/Decimal, raises `ValueError` otherwise).
+- `Vehicle` (Story 3.2) and `Driver` (Story 3.1) live in their own files, `vehicle.py` and `driver.py`. `Vehicle` restricts type to the `VEHICLE_TYPES` enum (BIKE/CAR/VAN), requires weight/volume > 0, and exposes `can_carry(order)`. `Driver` composes a `Vehicle`, toggles availability (`toggle_availability()`, default available), and holds an optional assigned `DeliveryOrder` (`assign_order`/`assigned_order`/`clear_order`).
+- Pricing (Epic 5) is partial: `DeliveryOrder.quote()` is a classmethod returning `_BASE_FARE + _DISTANCE_FARE + surge_price`; `surge()` is still a stub that just stores `surge_price` on the instance.
 - The Epic 4 algorithmic components (sliding window, hash map, graph BFS/DFS, heap, DP) don't exist yet — when they're built, expect them to be the core of the dispatch flow that Epic 2's order lifecycle and Epic 3's driver availability feed into.

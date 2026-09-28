@@ -21,7 +21,7 @@ Last reviewed against the codebase: 2026-09-27.
 - 🚧 In flight (started, partially meets AC)
 - ⬜ Not started
 
-Epic/story headings show overall status; in-flight stories also show per-AC status plus a QA note. Nothing is fully complete yet, so no story heading carries ✅. No story has meaningful test coverage beyond init smoke tests.
+Epic/story headings show overall status; in-flight stories also show per-AC status plus a QA note. Nothing is fully complete yet, so no story heading carries ✅. Test coverage is thin: init smoke tests plus `Vehicle` weight/volume validation (Story 3.2 AC1).
 
 | Epic | Status |
 |---|---|
